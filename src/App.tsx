@@ -3,20 +3,26 @@ import { useState, useRef, useEffect } from "react";
 function App() {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [chatInput, setChatInput] = useState("");
-  const [leftWidth, setLeftWidth] = useState(60); // Initial width percentage for left column
-  const [editorHeight, setEditorHeight] = useState(60); // Initial height percentage for editor
-  const [chatHeight, setChatHeight] = useState(60); // Initial height percentage for chatbot
+  const [code, setCode] = useState("");
+  const [chatResponse, setChatResponse] = useState(""); // New state for AI chatbot
+  const [explanation, setExplanation] = useState(""); // New state for explanation
+  const [terminalOutput, setTerminalOutput] = useState(""); // New state for terminal
+  const [leftWidth, setLeftWidth] = useState(60);
+  const [editorHeight, setEditorHeight] = useState(60);
+  const [chatHeight, setChatHeight] = useState(60);
+  const [cursorPosition, setCursorPosition] = useState({ line: 1, col: 1 });
+  const [selectedLanguage, setSelectedLanguage] = useState("");
   const containerRef = useRef<HTMLDivElement | null>(null);
   const leftSectionRef = useRef<HTMLDivElement | null>(null);
   const rightSectionRef = useRef<HTMLDivElement | null>(null);
+  const editorRef = useRef<HTMLTextAreaElement | null>(null);
   const isResizingHorizontal = useRef(false);
   const isResizingVerticalLeft = useRef(false);
   const isResizingVerticalRight = useRef(false);
 
-  // Handle horizontal resizing (left/right columns)
+  // Existing resize handlers remain unchanged
   const handleHorizontalMouseMove = (e: MouseEvent) => {
     if (!isResizingHorizontal.current || !containerRef.current) return;
-
     const container = containerRef.current;
     const containerWidth = container.getBoundingClientRect().width;
     const newLeftWidth =
@@ -38,10 +44,8 @@ function App() {
     document.addEventListener("mouseup", handleHorizontalMouseUp);
   };
 
-  // Handle vertical resizing (editor/terminal - left section)
   const handleVerticalLeftMouseMove = (e: MouseEvent) => {
     if (!isResizingVerticalLeft.current || !leftSectionRef.current) return;
-
     const container = leftSectionRef.current;
     const containerHeight = container.getBoundingClientRect().height;
     const newEditorHeight =
@@ -63,10 +67,8 @@ function App() {
     document.addEventListener("mouseup", handleVerticalLeftMouseUp);
   };
 
-  // Handle vertical resizing (chatbot/explanation - right section)
   const handleVerticalRightMouseMove = (e: MouseEvent) => {
     if (!isResizingVerticalRight.current || !rightSectionRef.current) return;
-
     const container = rightSectionRef.current;
     const containerHeight = container.getBoundingClientRect().height;
     const newChatHeight =
@@ -88,7 +90,51 @@ function App() {
     document.addEventListener("mouseup", handleVerticalRightMouseUp);
   };
 
-  // Cleanup event listeners on unmount
+  // Update cursor position and code
+  const handleCodeChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newCode = e.target.value;
+    setCode(newCode);
+
+    if (!editorRef.current) return;
+    const textarea = editorRef.current;
+    const cursorPos = textarea.selectionStart;
+    const textBeforeCursor = newCode.substring(0, cursorPos);
+    const lines = textBeforeCursor.split("\n");
+    const lineNumber = lines.length;
+    const columnNumber = lines[lines.length - 1].length + 1;
+
+    setCursorPosition({ line: lineNumber, col: columnNumber });
+  };
+
+  const updateCursorPosition = () => {
+    if (!editorRef.current) return;
+
+    const textarea = editorRef.current;
+    const cursorPos = textarea.selectionStart;
+    const textBeforeCursor = code.substring(0, cursorPos);
+    const lines = textBeforeCursor.split("\n");
+    const lineNumber = lines.length;
+    const columnNumber = lines[lines.length - 1].length + 1;
+
+    setCursorPosition({ line: lineNumber, col: columnNumber });
+  };
+
+  // Handle language selection
+  const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newLanguage = e.target.value || "Plain Text";
+    setSelectedLanguage(newLanguage);
+  };
+
+  // Handle chat send (example implementation)
+  const handleChatSend = () => {
+    // For now, just echo the input as a response
+    setChatResponse(`AI Response: ${chatInput}`);
+    setExplanation(`Explanation: This is a response to "${chatInput}"`);
+    setTerminalOutput(`Terminal: Processed "${chatInput}"`);
+    setChatInput("");
+  };
+
+  // Cleanup and event listeners
   useEffect(() => {
     return () => {
       document.removeEventListener("mousemove", handleHorizontalMouseMove);
@@ -109,7 +155,7 @@ function App() {
       {/* Header */}
       <div className="appname w-full h-14 px-6 flex items-center justify-between border-b border-gray-700 shadow-md">
         <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-          Intelligent IDE
+          Codeasy
         </h1>
         <button
           onClick={() => setIsDarkMode(!isDarkMode)}
@@ -121,7 +167,7 @@ function App() {
 
       {/* Navbar */}
       <div className="navbar flex gap-8 px-6 py-3 border-b border-gray-700 bg-gray-800/50">
-        {["File", "Terminal", "Console", "Settings"].map((item) => (
+        {["File", "Terminal", "View", "Console", "Settings"].map((item) => (
           <a
             key={item}
             href="#"
@@ -146,20 +192,32 @@ function App() {
             style={{ height: `${editorHeight}%` }}
           >
             <div className="head flex justify-end gap-4 p-2 bg-gray-800/70 border-b border-gray-700">
-              <select className="bg-gray-700 rounded px-3 py-1 text-sm hover:bg-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option>Language</option>
-                <option>JavaScript</option>
-                <option>Python</option>
-                <option>Java</option>
+              <select
+                className="bg-gray-700 rounded px-3 py-1 text-sm hover:bg-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onChange={handleLanguageChange}
+                value={selectedLanguage}
+              >
+                <option value="Plain Text">Language</option>
+                <option value="C">C</option>
+                <option value="C++">C++</option>
+                <option value="Java">Java</option>
+                <option value="Python">Python</option>
+                <option value="JavaScript">JavaScript</option>
+                <option value="Ruby">Ruby</option>
               </select>
               <button className="bg-green-600 px-4 py-1 rounded text-sm hover:bg-green-700 transition-all duration-200 transform hover:scale-105">
                 Run
               </button>
             </div>
             <textarea
+              ref={editorRef}
               name="code"
               placeholder="Write your code here..."
+              value={code}
               className="w-full flex-1 bg-gray-800/30 p-4 font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+              onKeyUp={updateCursorPosition}
+              onClick={updateCursorPosition}
+              onChange={handleCodeChange}
             />
           </div>
 
@@ -174,13 +232,19 @@ function App() {
             className="terminal flex flex-col"
             style={{ height: `${100 - editorHeight}%` }}
           >
-            <div className="head p-2 bg-gray-800/70 flex justify-end">
+            <div className="head p-3 bg-gray-800/70 flex justify-between">
+              <h2 className="text-lg font-semibold">Terminal</h2>
               <button className="bg-blue-600 px-4 py-1 rounded text-sm hover:bg-blue-700 transition-all duration-200">
                 Debug
               </button>
             </div>
             <div className="output flex-1 p-4 bg-gray-800/30 font-mono text-sm overflow-auto">
-              Here the output will be displayed
+              <textarea
+                placeholder="Terminal output will be displayed here..."
+                value={terminalOutput}
+                readOnly
+                className="w-full h-full bg-transparent font-mono text-sm resize-none focus:outline-none"
+              />
             </div>
           </div>
         </div>
@@ -213,8 +277,9 @@ function App() {
             <div className="response flex-1 overflow-auto animate-fadeIn">
               <textarea
                 placeholder="This is the AI response"
+                value={chatResponse}
                 readOnly
-                className="w-full h-full p-4 bg-gray-800/50 rounded-lg shadow-md text-white resize-none focus:outline-none"
+                className="w-full h-full p-4 bg-gray-800/50 shadow-md text-white resize-none focus:outline-none"
               />
             </div>
             <div className="input-section p-3 bg-gray-800/70 flex items-center gap-2 border-t border-gray-700">
@@ -226,10 +291,7 @@ function App() {
                 className="flex-1 bg-gray-700 p-2 rounded text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
               />
               <button
-                onClick={() => {
-                  console.log(chatInput);
-                  setChatInput("");
-                }}
+                onClick={handleChatSend}
                 className="bg-blue-600 px-4 py-2 rounded text-sm hover:bg-blue-700 transition-all duration-200"
               >
                 Send
@@ -248,9 +310,13 @@ function App() {
             className="explain flex flex-col"
             style={{ height: `${100 - chatHeight}%` }}
           >
-            <div className="response bg-gray-800/50 p-4 rounded-lg shadow-md animate-slideUp flex-1">
+            <div className="flex justify-between items-center p-3 bg-gray-800/70 border-b border-gray-700">
+              <h2 className="text-lg font-semibold">AI Explanation</h2>
+            </div>
+            <div className="response bg-gray-800/50 p-3 shadow-md animate-slideUp flex-1">
               <textarea
-                placeholder="This is the AI response"
+                placeholder="No code to explain"
+                value={explanation}
                 readOnly
                 className="w-full h-full bg-transparent text-white resize-none focus:outline-none"
               />
@@ -259,12 +325,14 @@ function App() {
         </div>
       </div>
 
-      {/* Status Bar */}
+      {/* Updated Status Bar */}
       <div className="status-bar w-full h-8 px-4 flex items-center justify-between bg-gray-800/70 border-t border-gray-700 text-sm">
         <div className="left-status flex items-center gap-4">
-          <span>Ln 1, Col 1</span>
+          <span>
+            Ln {cursorPosition.line}, Col {cursorPosition.col}
+          </span>
           <span>UTF-8</span>
-          <span>JavaScript</span>
+          <span>{selectedLanguage}</span>
         </div>
         <div className="right-status flex items-center gap-4">
           <span>Connected</span>
