@@ -157,6 +157,7 @@ function App() {
             setCursorPosition={setCursorPosition}
             handleVerticalLeftMouseDown={handleVerticalLeftMouseDown}
           />
+
           <Terminal
             terminalOutput={terminalOutput}
             editorHeight={editorHeight}
