@@ -1,12 +1,8 @@
-interface StatusBarProps {
-  cursorPosition: { line: number; col: number };
-  selectedLanguage: string;
-}
+import { useIdeContext } from "../context/IDEContext";
 
-export default function StatusBar({
-  cursorPosition,
-  selectedLanguage,
-}: StatusBarProps) {
+export default function StatusBar() {
+  const { cursorPosition, selectedLanguage } = useIdeContext();
+
   return (
     <div className="status-bar w-full h-8 px-4 flex items-center justify-between bg-gray-800/70 border-t border-gray-700 text-sm">
       <div className="left-status flex items-center gap-4">

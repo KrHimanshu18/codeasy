@@ -1,26 +1,17 @@
 import { useRef } from "react";
+import { useIdeContext } from "../context/IDEContext";
 
-interface CodeEditorProps {
-  code: string;
-  setCode: (code: string) => void;
-  editorHeight: number;
-  selectedLanguage: string;
-  setSelectedLanguage: (lang: string) => void;
-  cursorPosition: { line: number; col: number };
-  setCursorPosition: (pos: { line: number; col: number }) => void;
-  handleVerticalLeftMouseDown: () => void;
-}
-
-export default function CodeEditor({
-  code,
-  setCode,
-  editorHeight,
-  selectedLanguage,
-  setSelectedLanguage,
-  cursorPosition,
-  setCursorPosition,
-  handleVerticalLeftMouseDown,
-}: CodeEditorProps) {
+export default function CodeEditor() {
+  const {
+    code,
+    setCode,
+    editorHeight,
+    selectedLanguage,
+    setSelectedLanguage,
+    cursorPosition,
+    setCursorPosition,
+    handleVerticalLeftMouseDown,
+  } = useIdeContext();
   const editorRef = useRef<HTMLTextAreaElement | null>(null);
 
   const handleCodeChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {

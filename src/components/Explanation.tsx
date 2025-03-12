@@ -1,12 +1,8 @@
-interface ExplanationProps {
-  explanation: string;
-  chatHeight: number;
-}
+import { useIdeContext } from "../context/IDEContext";
 
-export default function Explanation({
-  explanation,
-  chatHeight,
-}: ExplanationProps) {
+export default function Explanation() {
+  const { explanation, chatHeight } = useIdeContext();
+
   return (
     <div
       className="explain flex flex-col"

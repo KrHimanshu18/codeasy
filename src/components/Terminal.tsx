@@ -1,12 +1,8 @@
-interface TerminalProps {
-  terminalOutput: string;
-  editorHeight: number;
-}
+import { useIdeContext } from "../context/IDEContext";
 
-export default function Terminal({
-  terminalOutput,
-  editorHeight,
-}: TerminalProps) {
+export default function Terminal() {
+  const { terminalOutput, editorHeight } = useIdeContext();
+
   return (
     <div
       className="terminal flex flex-col"

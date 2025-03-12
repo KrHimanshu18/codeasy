@@ -1,20 +1,15 @@
-interface ChatBotProps {
-  chatInput: string;
-  setChatInput: (input: string) => void;
-  chatResponse: string;
-  chatHeight: number;
-  handleChatSend: () => void;
-  handleVerticalRightMouseDown: () => void;
-}
+import { useIdeContext } from "../context/IDEContext";
 
-export default function ChatBot({
-  chatInput,
-  setChatInput,
-  chatResponse,
-  chatHeight,
-  handleChatSend,
-  handleVerticalRightMouseDown,
-}: ChatBotProps) {
+export default function ChatBot() {
+  const {
+    chatInput,
+    setChatInput,
+    chatResponse,
+    chatHeight,
+    handleChatSend,
+    handleVerticalRightMouseDown,
+  } = useIdeContext();
+
   return (
     <div
       className="chatbot flex flex-col justify-between"

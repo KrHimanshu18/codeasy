@@ -1,115 +1,20 @@
-import { useState, useRef, useEffect } from "react";
-import ChatBot from "./components/ChatBot";
 import CodeEditor from "./components/CodeEditor";
+import Terminal from "./components/Terminal";
+import ChatBot from "./components/ChatBot";
 import Explanation from "./components/Explanation";
 import StatusBar from "./components/StatusBar";
-import Terminal from "./components/Terminal";
+import { IdeProvider, useIdeContext } from "./context/IDEContext";
 
-function App() {
-  const [isDarkMode, setIsDarkMode] = useState(true);
-  const [chatInput, setChatInput] = useState("");
-  const [code, setCode] = useState("");
-  const [chatResponse, setChatResponse] = useState("");
-  const [explanation, setExplanation] = useState("");
-  const [terminalOutput, setTerminalOutput] = useState("");
-  const [leftWidth, setLeftWidth] = useState(60);
-  const [editorHeight, setEditorHeight] = useState(60);
-  const [chatHeight, setChatHeight] = useState(60);
-  const [cursorPosition, setCursorPosition] = useState({ line: 1, col: 1 });
-  const [selectedLanguage, setSelectedLanguage] = useState("");
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const leftSectionRef = useRef<HTMLDivElement | null>(null);
-  const rightSectionRef = useRef<HTMLDivElement | null>(null);
-  const isResizingHorizontal = useRef(false);
-  const isResizingVerticalLeft = useRef(false);
-  const isResizingVerticalRight = useRef(false);
-
-  const handleHorizontalMouseMove = (e: MouseEvent) => {
-    if (!isResizingHorizontal.current || !containerRef.current) return;
-    const container = containerRef.current;
-    const containerWidth = container.getBoundingClientRect().width;
-    const newLeftWidth =
-      ((e.clientX - container.getBoundingClientRect().left) / containerWidth) *
-      100;
-    const constrainedWidth = Math.max(20, Math.min(80, newLeftWidth));
-    setLeftWidth(constrainedWidth);
-  };
-
-  const handleHorizontalMouseUp = () => {
-    isResizingHorizontal.current = false;
-    document.removeEventListener("mousemove", handleHorizontalMouseMove);
-    document.removeEventListener("mouseup", handleHorizontalMouseUp);
-  };
-
-  const handleHorizontalMouseDown = () => {
-    isResizingHorizontal.current = true;
-    document.addEventListener("mousemove", handleHorizontalMouseMove);
-    document.addEventListener("mouseup", handleHorizontalMouseUp);
-  };
-
-  const handleVerticalLeftMouseMove = (e: MouseEvent) => {
-    if (!isResizingVerticalLeft.current || !leftSectionRef.current) return;
-    const container = leftSectionRef.current;
-    const containerHeight = container.getBoundingClientRect().height;
-    const newEditorHeight =
-      ((e.clientY - container.getBoundingClientRect().top) / containerHeight) *
-      100;
-    const constrainedHeight = Math.max(20, Math.min(80, newEditorHeight));
-    setEditorHeight(constrainedHeight);
-  };
-
-  const handleVerticalLeftMouseUp = () => {
-    isResizingVerticalLeft.current = false;
-    document.removeEventListener("mousemove", handleVerticalLeftMouseMove);
-    document.removeEventListener("mouseup", handleVerticalLeftMouseUp);
-  };
-
-  const handleVerticalLeftMouseDown = () => {
-    isResizingVerticalLeft.current = true;
-    document.addEventListener("mousemove", handleVerticalLeftMouseMove);
-    document.addEventListener("mouseup", handleVerticalLeftMouseUp);
-  };
-
-  const handleVerticalRightMouseMove = (e: MouseEvent) => {
-    if (!isResizingVerticalRight.current || !rightSectionRef.current) return;
-    const container = rightSectionRef.current;
-    const containerHeight = container.getBoundingClientRect().height;
-    const newChatHeight =
-      ((e.clientY - container.getBoundingClientRect().top) / containerHeight) *
-      100;
-    const constrainedHeight = Math.max(20, Math.min(80, newChatHeight));
-    setChatHeight(constrainedHeight);
-  };
-
-  const handleVerticalRightMouseUp = () => {
-    isResizingVerticalRight.current = false;
-    document.removeEventListener("mousemove", handleVerticalRightMouseMove);
-    document.removeEventListener("mouseup", handleVerticalRightMouseUp);
-  };
-
-  const handleVerticalRightMouseDown = () => {
-    isResizingVerticalRight.current = true;
-    document.addEventListener("mousemove", handleVerticalRightMouseMove);
-    document.addEventListener("mouseup", handleVerticalRightMouseUp);
-  };
-
-  const handleChatSend = () => {
-    setChatResponse(`AI Response: ${chatInput}`);
-    setExplanation(`Explanation: This is a response to "${chatInput}"`);
-    setTerminalOutput(`Terminal: Processed "${chatInput}"`);
-    setChatInput("");
-  };
-
-  useEffect(() => {
-    return () => {
-      document.removeEventListener("mousemove", handleHorizontalMouseMove);
-      document.removeEventListener("mouseup", handleHorizontalMouseUp);
-      document.removeEventListener("mousemove", handleVerticalLeftMouseMove);
-      document.removeEventListener("mouseup", handleVerticalLeftMouseUp);
-      document.removeEventListener("mousemove", handleVerticalRightMouseMove);
-      document.removeEventListener("mouseup", handleVerticalRightMouseUp);
-    };
-  }, []);
+function AppContent() {
+  const {
+    isDarkMode,
+    setIsDarkMode,
+    leftWidth,
+    containerRef,
+    leftSectionRef,
+    rightSectionRef,
+    handleHorizontalMouseDown,
+  } = useIdeContext();
 
   return (
     <div
@@ -147,21 +52,8 @@ function App() {
           style={{ width: `${leftWidth}%` }}
           ref={leftSectionRef}
         >
-          <CodeEditor
-            code={code}
-            setCode={setCode}
-            editorHeight={editorHeight}
-            selectedLanguage={selectedLanguage}
-            setSelectedLanguage={setSelectedLanguage}
-            cursorPosition={cursorPosition}
-            setCursorPosition={setCursorPosition}
-            handleVerticalLeftMouseDown={handleVerticalLeftMouseDown}
-          />
-
-          <Terminal
-            terminalOutput={terminalOutput}
-            editorHeight={editorHeight}
-          />
+          <CodeEditor />
+          <Terminal />
         </div>
 
         <div
@@ -174,23 +66,21 @@ function App() {
           style={{ width: `${100 - leftWidth}%` }}
           ref={rightSectionRef}
         >
-          <ChatBot
-            chatInput={chatInput}
-            setChatInput={setChatInput}
-            chatResponse={chatResponse}
-            chatHeight={chatHeight}
-            handleChatSend={handleChatSend}
-            handleVerticalRightMouseDown={handleVerticalRightMouseDown}
-          />
-          <Explanation explanation={explanation} chatHeight={chatHeight} />
+          <ChatBot />
+          <Explanation />
         </div>
       </div>
 
-      <StatusBar
-        cursorPosition={cursorPosition}
-        selectedLanguage={selectedLanguage}
-      />
+      <StatusBar />
     </div>
+  );
+}
+
+function App() {
+  return (
+    <IdeProvider>
+      <AppContent />
+    </IdeProvider>
   );
 }
 
