@@ -6,9 +6,18 @@ export default function ChatBot() {
     setChatInput,
     chatResponse,
     chatHeight,
-    handleChatSend,
     handleVerticalRightMouseDown,
+    setChatResponse,
   } = useIdeContext();
+
+  const fetchChatResponse = async () => {
+    try {
+      setChatResponse("This is a test chat response");
+    } catch (error) {
+      setChatResponse("Error fetching chat response");
+      console.log(error);
+    }
+  };
 
   return (
     <div
@@ -40,7 +49,7 @@ export default function ChatBot() {
           className="flex-1 bg-gray-700 p-2 rounded text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
         />
         <button
-          onClick={handleChatSend}
+          onClick={fetchChatResponse}
           className="bg-blue-600 px-4 py-2 rounded text-sm hover:bg-blue-700 transition-all duration-200"
         >
           Send
