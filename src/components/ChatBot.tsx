@@ -1,4 +1,5 @@
 import { useIdeContext } from "../context/IDEContext";
+import { getChatResponse } from "./APIs";
 
 export default function ChatBot() {
   const {
@@ -12,7 +13,8 @@ export default function ChatBot() {
 
   const fetchChatResponse = async () => {
     try {
-      setChatResponse("This is a test chat response");
+      const response = await getChatResponse(chatInput);
+      setChatResponse(response);
     } catch (error) {
       setChatResponse("Error fetching chat response");
       console.log(error);
