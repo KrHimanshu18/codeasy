@@ -2,6 +2,8 @@ import { useRef } from "react";
 import { useIdeContext } from "../context/IDEContext";
 import { Editor } from "@monaco-editor/react";
 import { CODE_SNIPPETS, LANGUAGE_VERSIONS } from "../constant/constant";
+import { executeCode } from "./APIs";
+type LanguageKey = keyof typeof LANGUAGE_VERSIONS;
 
 export default function CodeEditor() {
   const {
@@ -13,6 +15,7 @@ export default function CodeEditor() {
     cursorPosition,
     setCursorPosition,
     handleVerticalLeftMouseDown,
+    setTerminalOutput,
   } = useIdeContext();
   const editorRef = useRef<any>(null); // Changed to any since Monaco editor isn't a standard textarea
   const languages = Object.entries(LANGUAGE_VERSIONS);
@@ -40,6 +43,7 @@ export default function CodeEditor() {
       CODE_SNIPPETS[newLanguage as keyof typeof CODE_SNIPPETS]?.helloWorld ||
         "Select language"
     );
+    setTerminalOutput("");
   };
 
   const onMount = (editor: any) => {
@@ -52,6 +56,23 @@ export default function CodeEditor() {
       line: position.lineNumber,
       col: position.column,
     });
+  };
+
+  const runCode = async () => {
+    const sourceCode = editorRef.current.getValue();
+    if (!sourceCode) return;
+    // console.log(sourceCode);
+
+    try {
+      const response = await executeCode(
+        selectedLanguage as LanguageKey,
+        sourceCode
+      );
+      // console.log(response.run.output);
+      setTerminalOutput(response.run.output);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -70,7 +91,10 @@ export default function CodeEditor() {
             return <option value={language}>{language}</option>;
           })}
         </select>
-        <button className="bg-green-600 px-4 py-1 rounded text-sm hover:bg-green-700 transition-all duration-200 transform hover:scale-105">
+        <button
+          className="bg-green-600 px-4 py-1 rounded text-sm hover:bg-green-700 transition-all duration-200 transform hover:scale-105"
+          onClick={runCode}
+        >
           Run
         </button>
       </div>
@@ -85,7 +109,6 @@ export default function CodeEditor() {
         onChange={handleCodeChange}
         onMount={onMount}
         language={selectedLanguage}
-        // Removed onKeyUp and onClick as they're handled by onDidChangeCursorPosition
       />
       <div
         className="h-2 bg-gray-700 hover:bg-gray-600 cursor-row-resize transition-colors duration-200"
