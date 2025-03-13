@@ -46,7 +46,7 @@ export const getDebugCode = async (code: string) => {
   return response;
 };
 
-export const getChatResponse = async (message: string) => {
+export const getChatResponse = async (message: string, code: string) => {
   const response = "This is a test chat response";
   return response;
 };

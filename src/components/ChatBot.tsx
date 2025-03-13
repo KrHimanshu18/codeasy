@@ -9,11 +9,12 @@ export default function ChatBot() {
     chatHeight,
     handleVerticalRightMouseDown,
     setChatResponse,
+    code,
   } = useIdeContext();
 
   const fetchChatResponse = async () => {
     try {
-      const response = await getChatResponse(chatInput);
+      const response = await getChatResponse(chatInput, code);
       setChatResponse(response);
     } catch (error) {
       setChatResponse("Error fetching chat response");

@@ -2,11 +2,11 @@ import { useIdeContext } from "../context/IDEContext";
 import { getExplanation } from "./APIs";
 
 export default function Explanation() {
-  const { explanation, setExplanation, chatHeight } = useIdeContext();
+  const { explanation, setExplanation, chatHeight, code } = useIdeContext();
 
   const fetchExplanation = async () => {
     try {
-      const response = await getExplanation(explanation);
+      const response = await getExplanation(code);
       setExplanation(response);
     } catch (error) {
       setExplanation("Error fetching explanation");
