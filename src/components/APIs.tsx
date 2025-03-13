@@ -22,17 +22,3 @@ export const executeCode = async (
   console.log(response.data);
   return response.data;
 };
-
-export const getExplanation = async (language: LanguageKey, code: string) => {
-  const response = await API.post("/explain", {
-    language: language,
-    version: LANGUAGE_VERSIONS[language],
-    files: [
-      {
-        content: code,
-      },
-    ],
-  });
-  console.log(response.data);
-  return response.data;
-};
