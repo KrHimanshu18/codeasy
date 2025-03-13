@@ -1,20 +1,23 @@
 import axios from "axios";
 import { LANGUAGE_VERSIONS } from "../constant/constant";
 
+const GEMINI_KEY = import.meta.env.VITE_GEMINI_KEY;
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`;
+
 const RUN = axios.create({
   baseURL: "https://emkc.org/api/v2/piston",
 });
 
 const EXPLAIN = axios.create({
-  baseURL: "https://emkc.org/api/v2/piston",
+  baseURL: GEMINI_URL,
 });
 
 const DEBUG = axios.create({
-  baseURL: "https://emkc.org/api/v2/piston",
+  baseURL: GEMINI_URL,
 });
 
 const CHAT = axios.create({
-  baseURL: "https://emkc.org/api/v2/piston",
+  baseURL: GEMINI_URL,
 });
 
 export type LanguageKey = keyof typeof LANGUAGE_VERSIONS;
@@ -36,17 +39,60 @@ export const executeCode = async (
   return response.data;
 };
 
-export const getExplanation = async (code: string) => {
-  const response = "This is a test explanation";
-  return response;
+export const getExplanation = async (code: string, language: string) => {
+  const response = await EXPLAIN.post("", {
+    contents: [
+      {
+        parts: [
+          {
+            text: "",
+          },
+        ],
+      },
+    ],
+  });
+
+  const aiResponse = "";
+
+  return aiResponse;
 };
 
-export const getDebugCode = async (code: string) => {
-  const response = "This is a test debug code";
-  return response;
+export const getDebugCode = async (
+  code: string,
+  language: string,
+  terminalOutput: string
+) => {
+  const response = await DEBUG.post("", {
+    contents: [
+      {
+        parts: [
+          {
+            text: "",
+          },
+        ],
+      },
+    ],
+  });
+
+  const aiResponse = "";
+
+  return aiResponse;
 };
 
 export const getChatResponse = async (message: string, code: string) => {
-  const response = "This is a test chat response";
-  return response;
+  const response = await CHAT.post("", {
+    contents: [
+      {
+        parts: [
+          {
+            text: "",
+          },
+        ],
+      },
+    ],
+  });
+
+  const aiResponse = "";
+
+  return aiResponse;
 };

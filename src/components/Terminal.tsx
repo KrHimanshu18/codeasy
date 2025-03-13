@@ -2,11 +2,16 @@ import { useIdeContext } from "../context/IDEContext";
 import { getDebugCode } from "./APIs";
 
 export default function Terminal() {
-  const { terminalOutput, editorHeight, setCode, code } = useIdeContext();
+  const { terminalOutput, editorHeight, setCode, code, selectedLanguage } =
+    useIdeContext();
 
   const debugCode = async () => {
     try {
-      const response = await getDebugCode(code);
+      const response = await getDebugCode(
+        code,
+        selectedLanguage,
+        terminalOutput
+      );
       setCode(response);
     } catch (error) {
       setCode("Error debugging code");
