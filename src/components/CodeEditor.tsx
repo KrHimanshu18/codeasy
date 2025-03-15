@@ -1,9 +1,9 @@
 import { useRef } from "react";
 import { useIdeContext } from "../context/IDEContext";
 import { Editor } from "@monaco-editor/react";
-import { CODE_SNIPPETS, LANGUAGE_VERSIONS } from "../constant/constant";
+import { CODE_SNIPPETS, LANGUAGE_MAP } from "../constant/constant";
 import { executeCode } from "./APIs";
-type LanguageKey = keyof typeof LANGUAGE_VERSIONS;
+type LanguageKey = keyof typeof LANGUAGE_MAP;
 
 export default function CodeEditor() {
   const {
@@ -12,13 +12,12 @@ export default function CodeEditor() {
     editorHeight,
     selectedLanguage,
     setSelectedLanguage,
-    cursorPosition,
     setCursorPosition,
     handleVerticalLeftMouseDown,
     setTerminalOutput,
   } = useIdeContext();
   const editorRef = useRef<any>(null); // Changed to any since Monaco editor isn't a standard textarea
-  const languages = Object.entries(LANGUAGE_VERSIONS);
+  const languages = Object.entries(LANGUAGE_MAP);
 
   const handleCodeChange = (value: string | undefined) => {
     const newCode = value || "";
@@ -69,7 +68,7 @@ export default function CodeEditor() {
         sourceCode
       );
       // console.log(response.run.output);
-      setTerminalOutput(response.run.output);
+      setTerminalOutput(response);
     } catch (error) {
       console.log(error);
     }
