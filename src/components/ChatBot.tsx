@@ -1,5 +1,6 @@
 import { useIdeContext } from "../context/IDEContext";
-import { getChatResponse } from "./APIs";
+import Prompt from "../constant/prompt";
+import { chatBotAiModel } from "../config.tsx/AiModel";
 
 export default function ChatBot() {
   const {
@@ -14,11 +15,15 @@ export default function ChatBot() {
 
   const fetchChatResponse = async () => {
     try {
-      const response = await getChatResponse(chatInput, code);
-      setChatResponse(response);
+      const prompt = code + chatInput + Prompt.CHATBOT;
+      const aiResponse = await chatBotAiModel.sendMessage(prompt);
+      const responseText = await aiResponse.response.text();
+      const chatResponse = JSON.parse(responseText);
+      console.log(chatResponse[0]);
+
+      setChatResponse(chatResponse[0]);
     } catch (error) {
-      setChatResponse("Error fetching chat response");
-      console.log(error);
+      console.error("Error getting response", error);
     }
   };
 

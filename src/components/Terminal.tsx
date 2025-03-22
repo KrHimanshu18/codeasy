@@ -1,21 +1,21 @@
 import { useIdeContext } from "../context/IDEContext";
-import { getDebugCode } from "./APIs";
+import { debugCodeAiModel } from "../config.tsx/AiModel";
+import Prompt from "../constant/prompt";
 
 export default function Terminal() {
-  const { terminalOutput, editorHeight, setCode, code, selectedLanguage } =
-    useIdeContext();
+  const { terminalOutput, editorHeight, setCode, code } = useIdeContext();
 
   const debugCode = async () => {
     try {
-      const response = await getDebugCode(
-        code,
-        selectedLanguage,
-        terminalOutput
-      );
-      setCode(response);
+      const prompt = code + Prompt.DEBUG;
+      const aiResponse = await debugCodeAiModel.sendMessage(prompt);
+      const responseText = await aiResponse.response.text();
+      const correctCode = JSON.parse(responseText);
+      console.log(correctCode[0]);
+
+      setCode(correctCode[0]);
     } catch (error) {
-      setCode("Error debugging code");
-      console.log(error);
+      console.error("Error debugging code:", error);
     }
   };
 

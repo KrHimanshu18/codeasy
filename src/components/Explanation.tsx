@@ -1,17 +1,21 @@
 import { useIdeContext } from "../context/IDEContext";
-import { getExplanation } from "./APIs";
+import Prompt from "../constant/prompt";
+import { explainAiModel } from "../config.tsx/AiModel";
 
 export default function Explanation() {
-  const { explanation, setExplanation, chatHeight, code, selectedLanguage } =
-    useIdeContext();
+  const { explanation, setExplanation, chatHeight, code } = useIdeContext();
 
   const fetchExplanation = async () => {
     try {
-      const response = await getExplanation(code, selectedLanguage);
-      setExplanation(response);
+      const prompt = code + Prompt.EXPLAIN;
+      const aiResponse = await explainAiModel.sendMessage(prompt);
+      const responseText = await aiResponse.response.text();
+      const explanation = JSON.parse(responseText);
+      console.log(explanation[0]);
+
+      setExplanation(explanation[0]);
     } catch (error) {
-      setExplanation("Error fetching explanation");
-      console.log(error);
+      console.error("Error debugging code:", error);
     }
   };
 
