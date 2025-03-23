@@ -1,9 +1,8 @@
 import { useRef } from "react";
 import { useIdeContext } from "../context/IDEContext";
 import { Editor } from "@monaco-editor/react";
-import { CODE_SNIPPETS, LANGUAGE_MAP } from "../constant/constant";
-import { executeCode } from "./APIs";
-type LanguageKey = keyof typeof LANGUAGE_MAP;
+import { CODE_SNIPPETS } from "../constant/constant";
+import axios from "axios";
 
 export default function CodeEditor() {
   const {
@@ -16,61 +15,98 @@ export default function CodeEditor() {
     handleVerticalLeftMouseDown,
     setTerminalOutput,
   } = useIdeContext();
-  const editorRef = useRef<any>(null); // Changed to any since Monaco editor isn't a standard textarea
-  const languages = Object.entries(LANGUAGE_MAP);
+
+  const editorRef = useRef<any>(null);
+  const RAPID_API_KEY = import.meta.env.VITE_RAPID_API_KEY;
+
+  // Check if API key is missing
+  if (!RAPID_API_KEY) {
+    console.warn("RAPID_API_KEY is not defined. Check your .env file.");
+  }
 
   const handleCodeChange = (value: string | undefined) => {
-    const newCode = value || "";
-    setCode(newCode);
-    // Cursor position will be updated by Monaco's built-in listener
+    setCode(value || "");
   };
 
-  const updateCursorPosition = (e: any) => {
+  const updateCursorPosition = () => {
     if (!editorRef.current) return;
-
     const position = editorRef.current.getPosition();
-    setCursorPosition({
-      line: position.lineNumber,
-      col: position.column,
-    });
+    if (position) {
+      setCursorPosition({ line: position.lineNumber, col: position.column });
+    }
   };
 
   const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newLanguage = e.target.value || "Plain Text";
+    const newLanguage = e.target.value || "javascript";
     setSelectedLanguage(newLanguage);
-    setCode(
-      CODE_SNIPPETS[newLanguage as keyof typeof CODE_SNIPPETS]?.helloWorld ||
-        "Select language"
-    );
     setTerminalOutput("");
+
+    // Set default code snippet for the selected language
+    setCode(
+      CODE_SNIPPETS[newLanguage as keyof typeof CODE_SNIPPETS]?.helloWorld || ""
+    );
   };
 
   const onMount = (editor: any) => {
+    if (!editor) return;
     editorRef.current = editor;
-    // Set up Monaco's built-in cursor position listener
     editor.onDidChangeCursorPosition(updateCursorPosition);
-    // Initial cursor position
-    const position = editor.getPosition();
-    setCursorPosition({
-      line: position.lineNumber,
-      col: position.column,
-    });
+    updateCursorPosition();
   };
 
   const runCode = async () => {
-    const sourceCode = editorRef.current.getValue();
-    if (!sourceCode) return;
-    // console.log(sourceCode);
+    setTerminalOutput("Executing code...");
+
+    const languageMap: Record<string, { apiLang: string; ext: string }> = {
+      javascript: { apiLang: "nodejs", ext: "js" },
+      python: { apiLang: "python", ext: "py" },
+      java: { apiLang: "java", ext: "java" },
+      cpp: { apiLang: "cpp", ext: "cpp" },
+    };
+
+    const languageInfo =
+      languageMap[selectedLanguage] || languageMap.javascript;
+    const fileName = `test.${languageInfo.ext}`;
+
+    const payload = {
+      language: languageInfo.apiLang,
+      stdin: "",
+      files: [{ name: fileName, content: code }],
+    };
 
     try {
-      const response = await executeCode(
-        selectedLanguage as LanguageKey,
-        sourceCode
+      const response = await axios.post(
+        "https://onecompiler-apis.p.rapidapi.com/api/v1/run",
+        payload,
+        {
+          headers: {
+            "X-RapidAPI-Key": RAPID_API_KEY,
+            "X-RapidAPI-Host": "onecompiler-apis.p.rapidapi.com",
+            "Content-Type": "application/json",
+          },
+        }
       );
-      // console.log(response.run.output);
-      setTerminalOutput(response);
-    } catch (error) {
-      console.log(error);
+
+      // Handle API response properly
+      const output = response.data?.stdout
+        ? response.data.stdout
+        : response.data?.stderr
+        ? `Error:\n${response.data.stderr}`
+        : "No output received.";
+
+      setTerminalOutput(output);
+    } catch (error: any) {
+      console.error(
+        "Compilation Error:",
+        error.response?.data || error.message
+      );
+      setTerminalOutput(
+        `Error executing code:\n${
+          error.response?.data?.stderr ||
+          error.response?.data?.message ||
+          error.message
+        }`
+      );
     }
   };
 
@@ -85,10 +121,10 @@ export default function CodeEditor() {
           onChange={handleLanguageChange}
           value={selectedLanguage}
         >
-          <option value="Plain Text">Language</option>
-          {languages.map(([language, version]) => {
-            return <option value={language}>{language}</option>;
-          })}
+          <option value="python">Python</option>
+          <option value="javascript">JavaScript</option>
+          <option value="java">Java</option>
+          <option value="cpp">C++</option>
         </select>
         <button
           className="bg-green-600 px-4 py-1 rounded text-sm hover:bg-green-700 transition-all duration-200 transform hover:scale-105"
@@ -98,11 +134,11 @@ export default function CodeEditor() {
         </button>
       </div>
       <Editor
-        value={code}
+        value={code || ""}
         theme="vs-dark"
         defaultValue={
           CODE_SNIPPETS[selectedLanguage as keyof typeof CODE_SNIPPETS]
-            ?.helloWorld || "Select language"
+            ?.helloWorld || ""
         }
         className="w-full flex-1 bg-gray-800/30 font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
         onChange={handleCodeChange}

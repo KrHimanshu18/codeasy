@@ -63,7 +63,7 @@ export const IdeProvider = ({ children }: { children: ReactNode }) => {
   const [editorHeight, setEditorHeight] = useState(60);
   const [chatHeight, setChatHeight] = useState(60);
   const [cursorPosition, setCursorPosition] = useState({ line: 1, col: 1 });
-  const [selectedLanguage, setSelectedLanguage] = useState("");
+  const [selectedLanguage, setSelectedLanguage] = useState("python");
   const containerRef = useRef<HTMLDivElement>(null!);
   const leftSectionRef = useRef<HTMLDivElement>(null!);
   const rightSectionRef = useRef<HTMLDivElement>(null!);
