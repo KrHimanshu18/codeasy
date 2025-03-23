@@ -62,10 +62,21 @@ export default function CodeEditor() {
       python: { apiLang: "python", ext: "py" },
       java: { apiLang: "java", ext: "java" },
       cpp: { apiLang: "cpp", ext: "cpp" },
+      c: { apiLang: "c", ext: "c" },
+      clojure: { apiLang: "clojure", ext: "clj" },
+      csharp: { apiLang: "csharp", ext: "cs" },
+      go: { apiLang: "go", ext: "go" },
+      kotlin: { apiLang: "kotlin", ext: "kt" },
+      nodejs: { apiLang: "nodejs", ext: "js" },
+      objectivec: { apiLang: "objectivec", ext: "m" },
+      ocaml: { apiLang: "ocaml", ext: "ml" },
+      php: { apiLang: "php", ext: "php" },
+      r: { apiLang: "r", ext: "r" },
+      ruby: { apiLang: "ruby", ext: "rb" },
+      swift: { apiLang: "swift", ext: "swift" },
     };
 
-    const languageInfo =
-      languageMap[selectedLanguage] || languageMap.javascript;
+    const languageInfo = languageMap[selectedLanguage] || languageMap.python;
     const fileName = `test.${languageInfo.ext}`;
 
     const payload = {
@@ -125,6 +136,18 @@ export default function CodeEditor() {
           <option value="javascript">JavaScript</option>
           <option value="java">Java</option>
           <option value="cpp">C++</option>
+          <option value="c">C</option>
+          <option value="clojure">Clojure</option>
+          <option value="csharp">C#</option>
+          <option value="go">Go</option>
+          <option value="kotlin">Kotlin</option>
+          <option value="nodejs">Node.js</option>
+          <option value="objectivec">Objective-C</option>
+          <option value="ocaml">OCaml</option>
+          <option value="php">PHP</option>
+          <option value="r">R</option>
+          <option value="ruby">Ruby</option>
+          <option value="swift">Swift</option>
         </select>
         <button
           className="bg-green-600 px-4 py-1 rounded text-sm hover:bg-green-700 transition-all duration-200 transform hover:scale-105"

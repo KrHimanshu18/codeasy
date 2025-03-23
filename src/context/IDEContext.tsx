@@ -55,7 +55,7 @@ export const useIdeContext = () => {
 export const IdeProvider = ({ children }: { children: ReactNode }) => {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [chatInput, setChatInput] = useState("");
-  const [code, setCode] = useState("");
+  const [code, setCode] = useState(`print("Hello world")`);
   const [chatResponse, setChatResponse] = useState("");
   const [explanation, setExplanation] = useState("");
   const [terminalOutput, setTerminalOutput] = useState("");
