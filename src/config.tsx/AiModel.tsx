@@ -1,10 +1,5 @@
-import {
-  GoogleGenerativeAI,
-  HarmCategory,
-  HarmBlockThreshold,
-} from "@google/generative-ai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const RAPID_API_KEY = import.meta.env.RAPID_API_KEY;
 const GEMINI_KEY = import.meta.env.VITE_GEMINI_KEY;
 const genAI = new GoogleGenerativeAI(GEMINI_KEY);
 
